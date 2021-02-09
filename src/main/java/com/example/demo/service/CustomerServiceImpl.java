@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dto.Customer;
 import com.example.demo.entity.CustomerEntity;
 import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.kafka.producer.KafkaProducer;
 import com.example.demo.repository.CustomerRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,12 @@ public class CustomerServiceImpl implements CustomerService {
 	@Autowired
 	private final CustomerRepository customerRepository;
 	
+	@Autowired
+	private final KafkaProducer kafkaProducer;
 	
-	public CustomerServiceImpl(CustomerRepository customerRepository) {
+	public CustomerServiceImpl(CustomerRepository customerRepository, KafkaProducer kafkaProducer) {
 		this.customerRepository = customerRepository;
+		this.kafkaProducer =  kafkaProducer;
 	}
 	
 
@@ -78,7 +82,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public Customer create(Customer customer) {
 		log.info("create service");
+		
 		CustomerEntity entity = customerRepository.save(getCustomerEntityFromDTO(customer));
+		kafkaProducer.sendMessage("created a customer id:: " + entity.getId());
+		
 		return getCustomerDTOFromEntity(entity);
 	}
 
@@ -89,6 +96,7 @@ public class CustomerServiceImpl implements CustomerService {
 		if(customerEntity.isPresent()) {
 			CustomerEntity entity = customerEntity.get();
 			setCustomerEntity(customer, entity);
+			kafkaProducer.sendMessage("udpated a customer id:: " + entity.getId());
 			customerRepository.save(entity);
 		}else {
 			throw new ResourceNotFoundException("Customer not found");
@@ -99,9 +107,10 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	public void delete(Long id) {
 		log.info("delete service");
-		Optional<CustomerEntity> customerEntity = customerRepository.findById(id);
-		if(customerEntity.isPresent()) {
-			customerRepository.delete(customerEntity.get());
+		Optional<CustomerEntity> entity = customerRepository.findById(id);
+		if(entity.isPresent()) {
+			customerRepository.delete(entity.get());
+			kafkaProducer.sendMessage("deleted a customer id:: " + entity.get().getId());
 		}else {
 			throw new ResourceNotFoundException("Customer not found");
 		}
