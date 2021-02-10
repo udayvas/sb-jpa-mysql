@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "kafka.channel-enabled", havingValue = "true")
+@ConditionalOnProperty(name = "kafka.producer-enabled", havingValue = "true")
 public class KafkaProducer {
 
 	private final KafkaProperties kafkaProperties;
