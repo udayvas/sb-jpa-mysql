@@ -14,11 +14,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 @Entity
 @Table(name = "CUSTOMER")
 public class CustomerEntity {

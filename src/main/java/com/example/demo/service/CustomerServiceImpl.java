@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CustomerServiceImpl implements CustomerService {
 
+	private static final String MESSAGE = "Customer not found";
+	
 	@Autowired
 	private final CustomerRepository customerRepository;
 	
@@ -39,7 +41,7 @@ public class CustomerServiceImpl implements CustomerService {
 			CustomerEntity entity = customerEntity.get();
 			return getCustomerDTOFromEntity(entity);
 		}else {
-			throw new ResourceNotFoundException("Customer not found");
+			throw new ResourceNotFoundException(MESSAGE);
 		}
 	}
 
@@ -84,7 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
 		log.info("create service");
 		
 		CustomerEntity entity = customerRepository.save(getCustomerEntityFromDTO(customer));
-		kafkaProducer.sendMessage("created a customer id:: " + entity.getId());
+		kafkaProducer.sendMessage(getCustomerDTOFromEntity(entity));
 		
 		return getCustomerDTOFromEntity(entity);
 	}
@@ -96,10 +98,10 @@ public class CustomerServiceImpl implements CustomerService {
 		if(customerEntity.isPresent()) {
 			CustomerEntity entity = customerEntity.get();
 			setCustomerEntity(customer, entity);
-			kafkaProducer.sendMessage("udpated a customer id:: " + entity.getId());
+			kafkaProducer.sendMessage(getCustomerDTOFromEntity(entity));
 			customerRepository.save(entity);
 		}else {
-			throw new ResourceNotFoundException("Customer not found");
+			throw new ResourceNotFoundException(MESSAGE);
 		}
 		return customer;
 	}
@@ -110,9 +112,9 @@ public class CustomerServiceImpl implements CustomerService {
 		Optional<CustomerEntity> entity = customerRepository.findById(id);
 		if(entity.isPresent()) {
 			customerRepository.delete(entity.get());
-			kafkaProducer.sendMessage("deleted a customer id:: " + entity.get().getId());
+			kafkaProducer.sendMessage(getCustomerDTOFromEntity(entity.get()));
 		}else {
-			throw new ResourceNotFoundException("Customer not found");
+			throw new ResourceNotFoundException(MESSAGE);
 		}
 		
 	}
