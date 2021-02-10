@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+  <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+  <springProperty name="spring.application.name" source="spring.application.name"/>
+  <springProperty name="app.logging.appender" source="app.logging.appender"/>
+  <springProperty name="app.logging.level" source="app.logging.level"/>
+
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="jsonConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>
+        {"appName":"${spring.application.name}"}
+      </customFields>
+      <fieldNames class="net.logstash.logback.fieldnames.ShortenedFieldNames">
+        <levelValue>[ignore]</levelValue>
+        <version>[ignore]</version>
+      </fieldNames>
+      <includeContext>false</includeContext>
+      <includeMdcKeyName>traceId</includeMdcKeyName>
+      <includeMdcKeyName>spanId</includeMdcKeyName>
+      <shortenedLoggerNameLength>20</shortenedLoggerNameLength>
+      <timeZone>UTC</timeZone>
+    </encoder>
+  </appender>
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="consoleAppender">
+    <encoder>
+      <pattern>%highlight(%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level %cyan(TR="%thread")
+        %-50.50(%logger{50})) traceId="%X{traceId}" spanId="%X{spanId}" : %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <root>
+    <appender-ref ref="${app.logging.appender:-jsonConsoleAppender}"/>
+    <level value="${app.logging.level:-INFO}"/>
+  </root>
+</configuration>

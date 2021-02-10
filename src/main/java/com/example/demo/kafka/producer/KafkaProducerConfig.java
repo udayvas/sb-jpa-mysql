@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -15,17 +14,22 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import com.example.demo.dto.Customer;
 
+import lombok.RequiredArgsConstructor;
+
 
 @Configuration
+@RequiredArgsConstructor
 public class KafkaProducerConfig {
 
-	@Value(value = "${kafka.bootstrapAddress}")
-	private String bootstrapAddress;
+	private final KafkaProperties kafkaProperties;
 
 	@Bean
 	public ProducerFactory<String, Customer> producerFactory() {
 		Map<String, Object> configProps = new HashMap<>();
-		configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        configProps.put(ProducerConfig.RETRIES_CONFIG, kafkaProperties.getNumberOfRetriesForProducer());
+        configProps.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, kafkaProperties.getProducerTimeoutInMs());
+        configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, kafkaProperties.getProducerRetryBackoffInMs());
 		configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 		configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		return new DefaultKafkaProducerFactory<>(configProps);

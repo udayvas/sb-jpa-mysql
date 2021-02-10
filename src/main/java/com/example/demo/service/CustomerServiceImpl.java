@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.Customer;
@@ -13,25 +12,18 @@ import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.kafka.producer.KafkaProducer;
 import com.example.demo.repository.CustomerRepository;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
 	private static final String MESSAGE = "Customer not found";
 	
-	@Autowired
 	private final CustomerRepository customerRepository;
-	
-	@Autowired
 	private final KafkaProducer kafkaProducer;
-	
-	public CustomerServiceImpl(CustomerRepository customerRepository, KafkaProducer kafkaProducer) {
-		this.customerRepository = customerRepository;
-		this.kafkaProducer =  kafkaProducer;
-	}
-	
 
 	@Override
 	public Customer getOne(Long id) {

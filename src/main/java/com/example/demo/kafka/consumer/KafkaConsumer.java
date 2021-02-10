@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaConsumer {
 
-	@KafkaListener(topics = "${kafka.topicName}", groupId = "kafka.groupId")
+	@KafkaListener(topics = "${kafka.customer-topic-name}", groupId = "kafka.group-id")
 	public void listenCustomerTopic(Customer message) {
 	    log.info("Received Message : " + message.toString());
 	}
